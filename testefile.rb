@@ -1,22 +1,24 @@
 
-#folder_path = 'F:\Musicas_NEW\mp3_anderson'
-folder_path = '/Users/cesarfilho/Music'
+require 'os'
 
-#CleanPathMusic(folder_path) 
+#Parametro do diretório a ser formatado
+folder_path = ARGV[0]
 
 def CleanPathMusic(path)
-  path = path.gsub(/\\/, '/')
+
+  if OS.windows?
+    path = path.gsub(/\\/, '/')
+  end
+
   Dir.glob(path + '/*').sort.each do |music|
       if File.directory? music
         CleanPathMusic(music)
       elsif
         filename = File.basename(music, File.extname(music))
-        filename = filename.gsub(/_/, '').gsub(/-/, ' - ')   
+        filename = filename.gsub(/_/, '').gsub(/-/, ' - ')
         filename = filename.split.map(&:capitalize).join(' ')
-        #if File.extname(music).uppercase == 'MP3'
-          puts filename
-        #File.rename(music, folder_path+'/' + filename + File.extname(music))  
-        #end    
+
+        puts filename
       end
   end
 end
