@@ -1,26 +1,45 @@
-
+require "mp3info"
 require 'os'
 
-#Parametro do diretório a ser formatado
-folder_path = ARGV[0]
+class ClearFiles
 
-def CleanPathMusic(path)
 
-  if OS.windows?
-    path = path.gsub(/\\/, '/')
+  def pathtoOSnow(path)
+    if OS.windows?
+      path = path.gsub(/\\/, '/')
+    end
+    return path
   end
 
-  Dir.glob(path + '/*').sort.each do |music|
-      if File.directory? music
-        CleanPathMusic(music)
-      elsif
-        filename = File.basename(music, File.extname(music))
-        filename = filename.gsub(/_/, '').gsub(/-/, ' - ')
-        filename = filename.split.map(&:capitalize).join(' ')
+  def CleanPathMusic(path)
 
-        puts filename
+    path = pathtoOSnow(path)
+
+    Dir.glob(path + '/*').sort.each do |file|
+      if File.directory? file
+        CleanPathMusic(file)
+      elsif
+        puts CleanFileName(file) + "@@@@ #{ShowMp3Tags(file)} "
       end
+    end
+  end
+
+  def CleanFileName(file)
+    exit if File.extname(file).upcase != '.MP3'
+
+    filename = File.basename(file, File.extname(file))
+    filename = filename.gsub(/_/, '').gsub(/-/, ' - ').gsub(/[ˆ0-9!@#$%ˆ&*-]/, ' ')
+    filename = filename.split.map(&:capitalize).join(' ')
+    return filename
+  end
+
+  def ShowMp3Tags(file)
+    Mp3Info.open(file) do |mp3|
+      return  "Song: #{mp3.tag.title}--#{mp3.tag.artist} "
+      #puts mp3.tag.album
+      #puts mp3.tag.tracknum
+    end
   end
 end
 
-CleanPathMusic(folder_path)
+ClearFiles.new.CleanPathMusic(ARGV[0])
